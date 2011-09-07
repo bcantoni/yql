@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd" https="false">
+    <meta>
+        <author>Brian Cantoni</author>
+        <description>Random string generator from random.org; set num for number of results, len for string length, and digits/upperalpha/loweralpha to control characters appearing in results (all default on, can be set to off).</description>
+        <documentationURL>http://www.random.org/clients/http/</documentationURL>
+        <sampleQuery>select * from {table} where num='10' and len='8' and digits='no';</sampleQuery>
+    </meta>
+    <bindings>
+        <select itemPath="" produces="XML">
+            <urls>
+                <url>http://www.random.org/strings/</url>
+            </urls>
+            <inputs>
+                <key id="num" type="xs:string" paramType="query"/>
+                <key id="len" type="xs:string" paramType="query"/>
+                <key id="digits" type="xs:string" paramType="query" default="on" />
+                <key id="upperalpha" type="xs:string" paramType="query" default="on" />
+                <key id="loweralpha" type="xs:string" paramType="query" default="on" />
+                <key id="unique" type="xs:string" paramType="query" default="on" />
+                <key id="rnd" type="xs:string" paramType="query" default="new" />
+                <key id="format" type="xs:string" paramType="query" default="plain" const="true" />
+            </inputs>
+            <execute>
+                <![CDATA[
+                String.prototype.trim = function () {
+                    return this.replace(/^\s+|\s+$/g, "");
+                };
+                request.header('Cache-Control', 'no-cache');
+                var req = request.get();
+                if (req.status == '200') {
+                    results = req.response.trim().split("\n");
+                    rlen = results.length;
+                    response.object = <data></data>;
+                    for (var i=0; i<rlen; i++) {
+                        response.object.data += <value>{results[i]}</value>;
+                    }
+                } else {
+                    response.object = <error>Error returned from random.org; possibly caused by rate limiting or invalid parameters.</error>
+                }
+                ]]>
+            </execute>
+        </select>
+    </bindings>
+</table>
+

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd" https="false">
+    <meta>
+        <author>Brian Cantoni</author>
+        <description>Random sequence generator from random.org; set min/max for range of values.</description>
+        <documentationURL>http://www.random.org/clients/http/</documentationURL>
+        <sampleQuery>select * from {table} where min='1' and max='21';</sampleQuery>
+    </meta>
+    <bindings>
+        <select itemPath="" produces="XML">
+            <urls>
+                <url>http://www.random.org/sequences/</url>
+            </urls>
+            <inputs>
+                <key id="min" type="xs:string" paramType="query"/>
+                <key id="max" type="xs:string" paramType="query"/>
+                <key id="rnd" type="xs:string" paramType="query" default="new" />
+                <key id="col" type="xs:string" paramType="query" default="1" const="true" />
+                <key id="format" type="xs:string" paramType="query" default="plain" const="true" />
+            </inputs>
+            <execute>
+                <![CDATA[
+                String.prototype.trim = function () {
+                    return this.replace(/^\s+|\s+$/g, "");
+                };
+                request.header('Cache-Control', 'no-cache');
+                var req = request.get();
+                if (req.status == '200') {
+                    results = req.response.trim().split("\n");
+                    rlen = results.length;
+                    response.object = <data></data>;
+                    for (var i=0; i<rlen; i++) {
+                        response.object.data += <value>{results[i]}</value>;
+                    }
+                } else {
+                    response.object = <error>Error returned from random.org; possibly caused by rate limiting or invalid parameters.</error>
+                }
+                ]]>
+            </execute>
+        </select>
+    </bindings>
+</table>
+
